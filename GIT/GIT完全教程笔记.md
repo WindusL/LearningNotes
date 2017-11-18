@@ -3,7 +3,7 @@
 ```
 #因为git是分布式,所以每个机器都要自报家门
 $ git config --global user.name "Your Name"
- $ git config --global user.email "email@example.com" 
+$ git config --global user.email "email@example.com" 
 ```
 ## 创建版本仓库
 ```
@@ -28,7 +28,7 @@ HEAD^ #表示上一个提交版本
 HEAD~100 #表示往上100个版本(~ 代替多个 ^)
 |
 #git reset 版本号
-$ git reset --hard HEAD^ #回退到上个版本 
+$ git reset --hard HEAD^ #回退到上个版本
 ```
 
 > git reset 后面如果是版本号不用写全,只写前几位就可以了.GIT版本回退非常快,因为GIT在内部有个指向当前版本的HEAD指针,当回退版本时GIT仅仅是把HEAD从指向当前版本改为指向回退版本(如下图),顺便把工作区更新了.
@@ -70,10 +70,8 @@ $ git remote add origin 远程仓库地址 #关联远程仓库(origin是git远�
 $ git push #本地内容推送到远程仓库
 ```
 > 关联后第一次推送仓库的所有内容使用命令:git push -u origin master
-> 此后,每次推送本地修改内容可以使用命令:git push origin master 
+> 此后,每次推送本地修改内容可以使用命令:git push origin master
 
 ```
 	$ git clone 远程仓库地址 #克隆远程仓库到本地
 ```
-
-

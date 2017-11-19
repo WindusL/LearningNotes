@@ -69,7 +69,7 @@ $ git rm 文件名 #从版本库中删除文件
 > 如果不小心删错了,可以直接撤销修改(git checkout -- 文件名)
 > 如果文件以经提交到版本库,那么永远不用担心误删,但只能恢复到最新版本库,最新修改将丢失.
 
-## 远程仓库
+## <a name="h2_remote_orgin">远程仓库</a>
 ```
 $ git remote add origin 远程仓库地址 #关联远程仓库(origin是git远程仓库的默认名,可以修改)
 $ git push #本地内容推送到远程仓库
@@ -110,5 +110,57 @@ $ git stash list #查看stash列表
 $ git stash apply #恢复stash，但stash不删除
 $ git stash pop #恢复stash，同时删除stash
 ```
-> 如果多次执行stash后，恢复stash就加上stash名，如：git stash pop stash@{0}
+> 如果多次执行stash后，恢复stash就加上stash名，如：git stash pop/apply stash@{0}
 #### Feature分支
+> 开发新功能时最好创建一个新的分支。
+#### 推送分支(同<a href="#h2_remote_orgin">远程仓库</a>)
+```
+$ git push origin 分支名 #推送分支到远程仓库
+```
+#### 抓取分支
+```
+$ git pull #抓取分支
+$ git branch --set-upstream 分支名 origin/分支名 #第一次抓取分支需要先将本地分支与远程库分支时行连接。
+```
+#### 多人协作
+> 当从远程仓库克隆时，Git自动把本地master分支和远程分支对应起来。并且远程分为默认名是origin。
+```
+$ git remote #显示远程仓库名
+$ git remote -v #显示远程仓库信息
+origin  git@github.com:WindusL/LearningNotes.git (fetch)
+origin  git@github.com:WindusL/LearningNotes.git (push)
+```
+> 上面显示了可以抓取和推送的origin地址。如果没有推送权限就看不到push的地址。  
+多人协作的工作模式：  
+1.试图推送分支。  
+2.推送失败则要先抓取远程分支，试图合并。  
+3.合并有冲突，则解决冲突，并在本地提交。  
+4.没有冲突或解决掉了冲突，再推送到远程分支。
+
+## 标签管理
+> 发布新版本时，通常在版本库打一个标签，来确定打标签时刻的版本。将来无论什么时候，取某个标签的版本就是那个打标签时候的历史版本。所以，标签也相当于版本库的一个快照。  
+Git标签虽然是版本库的快照，但其实就是一个指向commit的指针（与分支类似，但分支可以移动，但标签不能移动）。所以，创建标签也是瞬间完成的。
+```
+$ git tag #查看所有标签
+$ git tag 标签名 #打标签
+$ git tag 标签名 commitId #给指定commit打标签
+$ gti show 标签名 #查看标签信息
+
+$ git tag -a 标签名 -m 注释 commitId #创建带有说明的标签
+
+$ git tag -d 标签名 #删除标签
+```
+> 还可以通过-s用私钥签名一个标签,采用PGP签名必须先安装gpg
+```
+$ git tag -s 标签名 -m 注释 commitId
+```
+> 推送远程标签
+```
+$ git push origin 标签名 #推送指定标签到远程仓库
+$ git push origin --tags #推送全部尚未推送到远程仓库的标签
+```
+> 删除远程标签
+```
+$ git tag -d 标签名 #先删除本地标签
+$ git push origin :refs/tags/标签名 #然后删除远程标签
+```

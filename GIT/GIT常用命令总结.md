@@ -15,7 +15,7 @@ $ git diff commitId commitId #查看两次提交的差异
 $ git diff 分支名 #工作区与指定分支的差异
 $ git diff 分支名 分支名 #查看两指定分支的差异 
 ``` 
-- shortlog命令
+- shortlog命令  
 	显示最近提交次数与每次提交消息
 
 - describe命令
@@ -25,6 +25,6 @@ $ git diff 分支名 分支名 #查看两指定分支的差异
 $ git describe [commitId|标签名]
 $ git describe --all [commitId|标签名]
 ```
-- reflog命令
+- reflog命令  
 显示全部操作日志(log仅显示从当前版本的日志,如果回退之后,再想回退到之前版本,可以使用该命令查看commitId)
 

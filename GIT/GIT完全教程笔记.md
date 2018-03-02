@@ -16,6 +16,13 @@ $ git commit -m '注释内容' #提交版本
 ## 版本比对
 ```
 $ git status #查看版本库状态以及文件修改状态
+1.未修改状态:nothing to commit,working tree clean
+2.修改后文件已在缓存区:Changes to be commited
+3.新增文件状态:Untracked files
+4.修改后文件未在缓存区:Changes not staged for commit
+3与4状态区别在于3无法用git commit –am命令将文件添加到本地仓库µ
+
+
 $ git diff 文件名 #查看文件异同
 ```
 

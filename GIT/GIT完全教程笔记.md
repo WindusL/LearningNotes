@@ -50,7 +50,8 @@ $ git reset --hard HEAD^ #回退到上个版本
 > 由于git log仅显示从当前版本到历史版本的纪录,如果回退了某个版本,又想还原到最新版本怎么办呢?
 
 ```
-$ git reflog #此命令用来记录你的第一次命令
+$ git reflog 
+#如果在回退以后又想再次回到之前的版本，git reflog 可以查看所有分支的所有操作记录（包括commit和reset的操作），包括已经被删除的commit记录，git log则不能察看已经删除了的commit记录
 ```
 
 ## 工作区和暂存区

@@ -1,9 +1,9 @@
 [TOC]
 ## 第一次安装设置
 ```
-#因为git是分布式,所以每个机器都要自报家门
-$ git config --global user.name "Your Name"
-$ git config --global user.email "email@example.com"
+#因为git是分布式,这些就是你在提交commit时的签名。(--global全局设置,不加则设置当前版本库)
+$ git config [--global] user.name "Your Name"
+$ git config [--global] user.email "email@example.com"
 ```
 
 ## 创建版本仓库
@@ -11,21 +11,24 @@ $ git config --global user.email "email@example.com"
 $ git init #创建版本仓库  
 $ git add #添加文件到版本仓库(可同时添加多个文件空格分割)
 $ git commit -m '注释内容' #提交版本  
+$ git commit (-v) #提交版本,启动编辑器编写注释(-v显示详细变更信息)
+$ git commit -a #提交版本,跳过使用暂存区(不用git add)
 ```
 
 ## 版本比对
 ```
-$ git status #查看版本库状态以及文件修改状态
+$ git status (-s/--short) #查看版本库状态以及文件修改状态(显示简单信息)
 1.未修改状态:nothing to commit,working tree clean
 2.修改后文件已在缓存区:Changes to be commited
 3.新增文件状态:Untracked files
 4.修改后文件未在缓存区:Changes not staged for commit
-3与4状态区别在于3无法用git commit –am命令将文件添加到本地仓库µ
-
-
-$ git diff 文件名 #查看文件异同
+3与4状态区别在于3无法用git commit –am命令将文件添加到本地仓库
 ```
 
+> git status -s符号意义:
+> ?? 新添加的未跟踪文件前面
+> A 新添加到暂存区中的文件
+> M 修改过的文件(出现在右边的,表示该文件被修改了但是还没放入暂存区，出现在靠左边的 M 表示该文件被修改了并放入了暂存区)
 ## 版本回退
 ```
 $ git log [--pretty] #显示从最近到最远的提交日志.--pretty 只显示一行
@@ -38,7 +41,9 @@ HEAD^ #表示上一个提交版本
 HEAD~100 #表示往上100个版本(~ 代替多个 ^)
 |
 #git reset 版本号
-$ git reset --hard HEAD^ #回退到上个版本
+$ git reset (--mixed) HEAD^ #回退到上个版本,缓存区和你指定的提交同步，但工作目录不受影响(--mixed是默认选项,可以不加)
+$ git reset --soft HEAD^ #回退到上个版本,缓存区和工作区都不受影响
+$ git reset --hard HEAD^ #回退到上个版本,缓存区和工作目录都同步到你指定的提交(危险指令)
 ```
 
 > git reset 后面如果是版本号不用写全,只写前几位就可以了.GIT版本回退非常快,因为GIT在内部有个指向当前版本的HEAD指针,当回退版本时GIT仅仅是把HEAD从指向当前版本改为指向回退版本(如下图),顺便把工作区更新了.
@@ -65,17 +70,29 @@ GIT版本库里存了很多东西,其中最重要的就是stage(或者叫index)�
 ![版本库](img/QQ20171117-115013@2x.png)
 ## 撤销修改
 ```
+$ git commit --amend #撤消上次文件提交的修改,重新提交
 $ git checkout -- 文件名 #撤销工作区文件的修改(如果没有--应变成了切换分支的命令)
-$ git reset HEAD 文件名 #撤销暂存区文件修改(HEADH表示撤销到最新版本)
+$ git reset HEAD 文件名 #撤销暂存区文件修改(HEAD表示撤销到最新版本)
 ```
 
 ## 删除文件
+
 ```
-$ git rm 文件名 #从版本库中删除文件
+$ git rm　[--cached] 文件名 #从版本库中删除文件(--cached从缓存区中移除到工作区)
 ```
 > GIT删除(git rm)文件后,直接提交(git commit)即可,不需要再添加到暂存区(git add).
 > 如果不小心删错了,可以直接撤销修改(git checkout -- 文件名)
-> 如果文件以经提交到版本库,那么永远不用担心误删,但只能恢复到最新版本库,最新修改将丢失.
+> 如果文件已经提交到版本库,那么永远不用担心误删,但只能恢复到最新版本库,最新修改将丢失.
+
+## 文件移动
+
+```
+$ git mv file_from file_to #重命名文件
+实际相当于运行下面三个命令
+$ mv file_from file_to
+$ git rm file_from
+$ git add file_to
+```
 
 ## 远程仓库<a name="h2_remote_orgin"></a>
 ```
@@ -87,6 +104,22 @@ $ git push #本地内容推送到远程仓库
 
 ```
 	$ git clone 远程仓库地址 #克隆远程仓库到本地
+	$ git fetch 远程仓库名 #从远程库摘取本地还没有的数据, 命令会将数据拉取到你的本地仓库 - 它并不会自动合并或修改你当前的工作 (???)
+```
+
+```
+$ git remote #显示远程仓库名
+$ git remote show [remote-name] #查看远程仓库更多信息
+
+$ git remote -v #显示远程仓库信息
+origin  git@github.com:WindusL/LearningNotes.git (fetch)
+origin  git@github.com:WindusL/LearningNotes.git (push)
+```
+> 上面显示了可以抓取和推送的origin地址。如果没有推送权限就看不到push的地址。
+
+```
+$ git remote rename [oldname] [newname] #对远程仓库的简写名称重命名指令
+$ git remote rm [remote-name] #对远程仓库的简写名称进行移除的命令
 ```
 
 ## 分支管理
@@ -100,8 +133,9 @@ $ git branch 分支名 #创建分支
 $ git checkout 分支名 #切换分支
 #上面两个命令相当于
 $ git checkout -b 分支名 #创建并切换分支(加上-b表示先创建后切换)
+$ git checkout -b 分支名 远程分支名 拉取远程分支到本地分支((加上-b表示先创建后切换)
 
-$ git branch #列出所有分支
+$ git branch (-a)#列出所有本地分支(-a 包括远程分支)
 $ git merge 分支名 #合并指定分支到当前分支
 $ git branch -d 分支名 #删除已合并分支
 $ git branch -D 分支名 #强制删除未合并的分支
@@ -138,14 +172,7 @@ $ git branch --set-upstream 分支名 origin/分支名 #第一次抓取分支需
 ```
 #### 多人协作
 > 当从远程仓库克隆时，Git自动把本地master分支和远程分支对应起来。并且远程分为默认名是origin。
-
-```
-$ git remote #显示远程仓库名
-$ git remote -v #显示远程仓库信息
-origin  git@github.com:WindusL/LearningNotes.git (fetch)
-origin  git@github.com:WindusL/LearningNotes.git (push)
-```
-> 上面显示了可以抓取和推送的origin地址。如果没有推送权限就看不到push的地址。  
+  
 多人协作的工作模式：  
 1.试图推送分支。  
 2.推送失败则要先抓取远程分支，试图合并。  
@@ -184,4 +211,26 @@ $ git tag -d 标签名 #先删除本地标签
 $ git push origin :refs/tags/标签名 #然后删除远程标签
 ```
 
+## 日志 git log
+
+```
+$ git log --stat #显示在每个提交(commit)中哪些文件被修改了
+$ git log -p #显示每次提交的内容差异
+$ git log -n #显示最近几条日志
+$ git log --pretty=oneline|format
+$ git log --graph #展示分支、合并历史
+$ git log --author #仅显示指定作者相关的提交。
+$ git log --committer #仅显示指定提交者相关的提交。
+$ git log --grep #仅显示含指定关键字的提交
+```
+
+## 比较 git diff
+
+```
+git diff <filename>#比较工作区与暂存区的差异  
+git diff --cached (<commitId>) <filename> #比较暂存区与上次(/指定commitId)提交的差异
+git diff HEAD/commitId <filename> #比较工作区与(上次/指定commitId)提交的差异
+git diff commitId commitId #比较Git仓库任意两次 commit 之间的差别
+git diff --stat #比较统计(如几处删除,几处增加等等)
+```
 

@@ -133,9 +133,10 @@ $ git branch 分支名 #创建分支
 $ git checkout 分支名 #切换分支
 #上面两个命令相当于
 $ git checkout -b 分支名 #创建并切换分支(加上-b表示先创建后切换)
-$ git checkout -b 分支名 远程分支名 拉取远程分支到本地分支((加上-b表示先创建后切换)
+$ git checkout -b 分支名 远程分支名 ＃拉取远程分支到本地分支((加上-b表示先创建后切换)
 
-$ git branch (-a)#列出所有本地分支(-a 包括远程分支)
+$ git branch (-a) #列出所有本地分支(-a 包括远程分支)
+$ git branch -v #查看每个分支最后一次的提交
 $ git merge 分支名 #合并指定分支到当前分支
 $ git branch -d 分支名 #删除已合并分支
 $ git branch -D 分支名 #强制删除未合并的分支
@@ -151,10 +152,13 @@ $ git merge --no-ff -m 注释 分支名 #合并分支(--no-ff表示禁用Fast Fo
 > 当一个分支的工作还没有做完，不能提交，而此时又要及时做其它工作时，可以先把工作区储藏起来。
 
 ```
-$ git stash #储藏工作区(储藏后再用git status查看就是干净的, 除非是没有被git管理的文件 )
+$ git stash #储藏工作区(储藏后再用git status查看就是干净的, 除非是没有被git管理的文件)
+$ git stash save 注释 #储藏工作区并添加注释
 $ git stash list #查看stash列表
 $ git stash apply #恢复stash，但stash不删除
 $ git stash pop #恢复stash，同时删除stash
+$ git stash drop #移除stash
+$ git stash show (-p/--patch) #查看stash(详细)修改
 ```
 > 如果多次执行stash后，恢复stash就加上stash名，如：git stash pop/apply stash@{0}
 
@@ -185,11 +189,11 @@ Git标签虽然是版本库的快照，但其实就是一个指向commit的指�
 
 ```
 $ git tag #查看所有标签
-$ git tag 标签名 #打标签
+$ git tag 标签名 #打标签(轻量标签)
 $ git tag 标签名 commitId #给指定commit打标签
-$ gti show 标签名 #查看标签信息
+$ git show 标签名 #查看标签信息
 
-$ git tag -a 标签名 -m 注释 commitId #创建带有说明的标签
+$ git tag -a 标签名 -m 注释 commitId #创建带有说明的标签(附注标签)
 
 $ git tag -d 标签名 #删除标签
 ```
@@ -210,7 +214,14 @@ $ git push origin --tags #推送全部尚未推送到远程仓库的标签
 $ git tag -d 标签名 #先删除本地标签
 $ git push origin :refs/tags/标签名 #然后删除远程标签
 ```
+> 检出标签
 
+```
+#在 Git 中你并不能真的检出一个标签，因为它们并不能像分支一样来回移动。
+#如果你想要工作目录与仓库中特定的标签版本完全一样，可以使在特定的标签上创建一个新分支：
+
+语法:git checkout -b [branchname] [tagname]
+```
 ## 日志 git log
 
 ```

@@ -29,10 +29,9 @@ $ git status (-s/--short) #查看版本库状态以及文件修改状态(显示�
 > ?? 新添加的未跟踪文件前面
 > A 新添加到暂存区中的文件
 > M 修改过的文件(出现在右边的,表示该文件被修改了但是还没放入暂存区，出现在靠左边的 M 表示该文件被修改了并放入了暂存区)
+
 ## 版本回退
-```
-$ git log [--pretty] #显示从最近到最远的提交日志.--pretty 只显示一行
-```
+
 > 和SVN不一样,GIT每个提交版本的commit id不是1,2,3...的数字而是一个SHA1计算出来的十六进制数字.因为GIT是分布式控制系统,如果用1,2,3...数字表示多人协作会重复.
 
 ```
@@ -104,17 +103,21 @@ $ git push #本地内容推送到远程仓库
 
 ```
 	$ git clone 远程仓库地址 #克隆远程仓库到本地
-	$ git fetch 远程仓库名 #从远程库摘取本地还没有的数据, 命令会将数据拉取到你的本地仓库 - 它并不会自动合并或修改你当前的工作 (???)
+	$ git fetch 远程仓库名 #从服务器上抓取本地没有的数据，它并不会修改工作目录中的内容, 它只会获取数据然后让你自己合并.
+	$ git pull #从服务器抓取分支数据并然后尝试合并.
 ```
+> 由于git pull命令经常让人困惑,所以通常单独显式地使用 git fetch 与git merge 命令会更好一些。
 
 ```
 $ git remote #显示远程仓库名
+$ git ls-remote #显示远程引用完整列表
 $ git remote show [remote-name] #查看远程仓库更多信息
 
 $ git remote -v #显示远程仓库信息
 origin  git@github.com:WindusL/LearningNotes.git (fetch)
 origin  git@github.com:WindusL/LearningNotes.git (push)
 ```
+
 > 上面显示了可以抓取和推送的origin地址。如果没有推送权限就看不到push的地址。
 
 ```
@@ -135,12 +138,42 @@ $ git checkout 分支名 #切换分支
 $ git checkout -b 分支名 #创建并切换分支(加上-b表示先创建后切换)
 $ git checkout -b 分支名 远程分支名 ＃拉取远程分支到本地分支((加上-b表示先创建后切换)
 
-$ git branch (-a) #列出所有本地分支(-a 包括远程分支)
-$ git branch -v #查看每个分支最后一次的提交
+$ git branch (-a/r) #列出所有本地分支(-a 包括远程分支,-r仅列出远程分支)
+$ git branch -v|-vv #查看每个分支最后一次的提交(-vv选项会列表更多信息)
 $ git merge 分支名 #合并指定分支到当前分支
-$ git branch -d 分支名 #删除已合并分支
+$ git branch -d (-r) 分支名 #删除已合并本地(-r表示romote远程)分支
 $ git branch -D 分支名 #强制删除未合并的分支
+$ git branch -m|-M 旧分支名 新分支名 # 分支生命名（-M强制生命名）
 ```
+
+> 重命名远程分支推荐做法:
+> 1、删除远程分支
+> 2、push本地新分支名到远程
+
+```
+$ git branch --merged|--no-merged #查看已（未）合并的分支
+```
+
+#### 分支-变基
+分支合并会产生记录,如果想不产生这些记录就可以使用分支变基后再合并.
+
+```
+$ git rebase 分支名 #把当前分支变基到指定分支
+
+#切换到要变基的分支进行变基
+$ git checkout experiment
+$ git rebase master
+First, rewinding head to replay your work on top of it...
+Applying: added staged command
+#回到合并分支进行合并
+$ git checkout master
+$ git merge experiment
+
+```
+	
+> 变基注意事项:
+> 只在从未推送至共用仓库的提交上执行变基命令
+	
 #### 分支管理策略
 > 通常，合并分支，如果可能Git会用Fast Forward模式，但这种模式下，删除分支后，会丢掉分支信息。  
 如果强制禁用Fast Forward模式，Git会在merge时生成一个新的commit，这样从分支历史上就可以看出分支信息。
@@ -149,7 +182,7 @@ $ git branch -D 分支名 #强制删除未合并的分支
 $ git merge --no-ff -m 注释 分支名 #合并分支(--no-ff表示禁用Fast Forward模式，因为要生成一个新的commit所以要加上-m注释参数)
 ```
 #### Bug分支
-> 当一个分支的工作还没有做完，不能提交，而此时又要及时做其它工作时，可以先把工作区储藏起来。
+> 当一个分支的工作还没有做完，不能提交，而此时又要及时做其它工作时，可以先把工作区储藏起来,创建bug分支(命名:fixbug-issueId)。
 
 ```
 $ git stash #储藏工作区(储藏后再用git status查看就是干净的, 除非是没有被git管理的文件)
@@ -163,17 +196,26 @@ $ git stash show (-p/--patch) #查看stash(详细)修改
 > 如果多次执行stash后，恢复stash就加上stash名，如：git stash pop/apply stash@{0}
 
 #### Feature分支
-> 开发新功能时最好创建一个新的分支。
+> 开发新功能时最好创建一个新的分支(命名:feature-x)。
+
+#### 预发布分支
+> 发布正式版本之前（即合并到 Master 分支之前），我们可能需要有一个预发布的版本进行测试(命名:release-版本号)。
 
 #### 推送分支(<a href="#h2_remote_orgin">同远程仓库</a>)
+
 ```
 $ git push origin 分支名 #推送分支到远程仓库
 ```
-#### 抓取分支
+
+#### 跟踪分支
+> 从一个远程分支检出一个本地分支会自动创建一个叫做 “跟踪分支”（有时候也叫做 “上游分支”）。 
+> 跟踪分支是与远程分支有直接关系的本地分支,Git 能自动地识别去哪个服务器上抓取、合并到哪个分支。
+
 ```
-$ git pull #抓取分支
-$ git branch --set-upstream 分支名 origin/分支名 #第一次抓取分支需要先将本地分支与远程库分支时行连接。
+#设置跟踪分支(将本地分支与远程库分支时行连接。)
+$ git branch --set-upstream|-u 分支名 origin/分支名 
 ```
+
 #### 多人协作
 > 当从远程仓库克隆时，Git自动把本地master分支和远程分支对应起来。并且远程分为默认名是origin。
   

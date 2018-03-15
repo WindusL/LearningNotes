@@ -1,7 +1,7 @@
 [TOC]
 ## Shell
 /etc/shells记录系统所有shell
-## bash shell 功能
+## Bash shell 功能
 ### 命令编修能力  
 
 > 默认指令记忆功能可以达到1000个
@@ -47,6 +47,34 @@ type 这个指令我们可以知道每个指令是否为 bash 的内置指令。
 	<tr>
 		<td>[ctrl]+a/[ctrl]+e</td>
 		<td>分别是让光标移动到整个指令串的最前面 （[ctrl]+a） 或最后面 （[ctrl]+e） </td>
+	</tr>
+	<tr>
+		<td>Ctrl + C</td>
+		<td>终止目前命令</td>
+	</tr>
+	<tr>
+		<td>Ctrl + D</td>
+		<td>输入结束(EOF),例如:邮件结束的时候</td>
+	</tr>
+	<tr>
+		<td>Ctrl + M</td>
+		<td>就是Enter</td>
+	</tr>
+	<tr>
+		<td>Ctrl + S</td>
+		<td>暂停屏幕输出</td>
+	</tr>
+	<tr>
+		<td>Ctrl + Q</td>
+		<td>恢复屏幕输出</td>
+	</tr>
+	<tr>
+		<td>Ctrl + U</td>
+		<td>在提示字符下，将整列命令删除</td>
+	</tr>
+	<tr>
+		<td>Ctrl + Z</td>
+		<td>“暂停”目前的命令</td>
 	</tr>
 </table>
 
@@ -259,4 +287,167 @@ bash 环境中的数值运算，默认最多仅能到达整数形态，所以 1/
 ```
 
 ### 命令别名与历史命令
+#### 别名设置 alias / unalias
+
+```
+#设置别名
+[dmtsai@study ~]$ alias lm='ls -al | more
+#取消别名
+[dmtsai@study ~]$ unalias lm
+```
+
+> 设置别名,在机器重启后将丢失,如果想永久存在,需要写在~/.bash_profile文件内
+
+#### 历史命令 history
+历史命令记录在~/.bash_history文件中,记录的数量由HISTFILESIZE环境变量决定.
+
+```
+[dmtsai@study ~]$ history [-raw] histfiles
+选项与参数：
+n   ：数字，意思是“要列出最近的 n 笔命令列表”的意思！
+-c  ：将目前的 shell 中的所有 history 内容全部消除
+-a  ：将目前新增的 history 指令新增入 histfiles 中，若没有加 histfiles ，
+      则默认写入 ~/.bash_history
+-r  ：将 histfiles 的内容读到目前这个 shell 的 history 记忆中；
+-w  ：将目前的 history 记忆内容写入 histfiles 中！
+```
+
+- 历史命令的使用:
+
+	```
+	[dmtsai@study ~]$ !
+	选项与参数：
+	number  ：执行第几笔指令的意思；
+	command ：由最近的指令向前搜寻“指令串开头为 command”的那个指令，并执行；
+	!!      ：就是执行上一个指令（相当于按↑按键后，按 Enter）
+	```
+
+- 同一帐号同时多次登陆的history写入问题
+
+	因为这些 bash 在同时以同一个身份登陆， 因此所有的 bash 都有自己的 1000 笔记录在内存中。因为等到登出时才会更新记录文件，所以，最后登出的那个 bash 才会是最后写入的数据。如此一来其他 bash 的指令操作就不会被记录下来了 （其实有被记录，只是被后来的最后一个 bash 所覆盖更新了） 。
+
+- 历史命令时间问题
+	历史命令还有一个问题，那就是无法记录指令下达的时间。由于这 1000 笔历史命令是依序记录的， 但是并没有记录时间，所以在查询方面会有一些不方便。其实可以通过~/.bash_logout 来进行 history 的记录，并加上 date 来增加时间参数.
+
+## Bash Shell操作环境
+
+### Bash 进站欢迎信息 /etc/issue  /etc/motd
+
+```
+issue 内的各代码意义:
+	\d 本地端时间的日期；
+	\l 显示第几个终端机接口；
+	\m 显示硬件的等级 （i386/i486/i586/i686...）；
+	\n 显示主机的网络名称；
+	\O 显示 domain name；
+	\r 操作系统的版本 （相当于 uname -r）
+	\t 显示本地端时间的时间；
+	\S 操作系统的名称；
+	\v 操作系统的版本
+```
+
+> 当我们使用 telnet 连接到主机时，主机的登陆画面就会显示 /etc/issue.net 而不是 /etc/issue
+> /etc/motd 里面显示的则是文字信息
+
+### bash环境配置文件
+#### login与non-login Shell
+- login shell：取得 bash 时需要完整的登陆流程的，就称为 login shell。举例来说，你要由 tty1 ~ tty6 登陆，需要输入使用者的帐号与密码，此时取得的 bash 就称为“ login shell ”
+
+- non-login shell：取得 bash 接口的方法不需要重复登陆的举动，举例来说，（1）你以 X window 登陆 Linux 后， 再以 X 的图形化接口启动终端机，此时那个终端接口并没有需要再次的输入帐号与密码，那个 bash 的环境就称为 non-login shell了。（2）你在原本的 bash 环境下再次下达 bash 这个指令，同样的也没有输入帐号密码， 那第二个 bash （子程序） 也是 non-login shell 。
+
+> 这两个Shell，读取的配置文件数据并不一样.
+
+#### /etc/profile (login Shell读取)
+这个配置文件可以利用使用者的识别码 （UID） 来决定很多重要的变量数据， 也是每个使用者登陆取得 bash 时一定会读取的配置文件.所以设置全局环境就要改这个文件!
+
+```
+主要变量:
+PATH：会依据 UID 决定 PATH 变量要不要含有 sbin 的系统指令目录；
+MAIL：依据帐号设置好使用者的 mailbox 到 /var/spool/mail/帐号名；
+USER：根据使用者的帐号设置此一变量内容；
+HOSTNAME：依据主机的 hostname 指令决定此一变量内容；
+HISTSIZE：历史命令记录笔数。CentOS 7.x 设置为 1000 ；
+umask：包括 root 默认为 022 而一般用户为 002 等！
+```
+
+> /etc/profile 还会调用外部的设置数据,主要有如下:
+
+- /etc/profile.d/*.sh
+	“这个目录内的众多文件！只要在 /etc/profile.d/ 这个目录内且扩展名为 .sh ，另外，使用者能够具有 r 的权限， 那么该文件就会被 /etc/profile 调用进来。在 CentOS 7.x 中，这个目录下面的文件规范了 bash 操作接口的颜色、 语系、ll 与 ls 指令的命令别名、vi 的命令别名、which 的命令别名等等。如果你需要帮所有使用者设置一些共享的命令别名时， 可以在这个目录下面自行创建扩展名为 .sh 的文件，并将所需要的数据写入即可！
+
+- /etc/locale.conf
+	这个文件是由 /etc/profile.d/lang.sh 调用进来的！这也是我们决定 bash 默认使用何种语系的重要配置文件！ 文件里最重要的就是 LANG/LC_ALL 这些个变量的设置！
+
+- /usr/share/bash-completion/completions/*
+	这个目录下除前面谈过 [tab] 命令补齐、文件名补齐之外，还可以进行指令的选项/参数补齐功能！那就是从这个目录里面找到相对应的指令来处理的！ 其实这个目录下面的内容是由 /etc/profile.d/bash_completion.sh 这个文件载入的啦！
+
+#### ~/.bash_profile (login Shell读取)
+bash 在读完了整体环境设置的 /etc/profile 并借此调用其他配置文件后，接下来则是会读取使用者的个人配置文件。 在 login shell 的 bash 环境中，所读取的个人偏好配置文件其实主要有三个，依序分别是：
+
+```
+1. ~/.bash_profile
+2. ~/.bash_login
+3. ~/.profile
+```
+
+其实 bash 的 login shell 设置只会读取上面三个文件的其中一个， 而读取的顺序则是依照上面的顺序。也就是说，如果 ~/.bash_profile 存在，那么其他两个文件不论有无存在，都不会被读取。 如果 ~/.bash_profile 不存在才会去读取 ~/.bash_login，而前两者都不存在才会读取 ~/.profile 的意思。 会有这么多的文件，其实是因应其他 shell 转换过来的使用者的习惯而已。
+
+![shell 读取流程](img/QQ20180315-174127@2x.png)
+
+#### source 读入环境配置文件指令
+由于 /etc/profile 与 ~/.bash_profile 都是在取得 login shell 的时候才会读取的配置文件，所以， 如果你将自己的偏好设置写入上述的文件后，通常都是得登出再登陆后，该设置才会生效。利用这个指令可以直接生效!
+
+```
+[dmtsai@study ~]$ source 配置文件文件名
+
+范例：将主文件夹的 ~/.bashrc 的设置读入目前的 bash 环境中
+[dmtsai@study ~]$ source ~/.bashrc  <==下面这两个指令是一样的！
+[dmtsai@study ~]$  .  ~/.bashrc
+```
+
+#### ~/.bashrc （non-login shell 读取）
+CentOS 7.x 还会主动的调用 /etc/bashrc 这个文件
+```
+/etc/bashrc文件记录内容
+1. 依据不同的 UID 规范出 umask 的值；
+2. 依据不同的 UID 规范出提示字符 （就是 PS1 变量）；
+3. 调用 /etc/profile.d/*.sh 的设置
+```
+
+> /etc/bashrc文件是Red Hat系统特有的,如果此文件丢失,可以复制 /etc/skel/.bashrc 到你的主文件夹.
+
+### 终端机环境设置 stty , set
+#### stty命令 
+查阅目前的一些按键内容
+
+```
+[dmtsai@study ~]$ stty [-a]
+选项与参数：
+-a  ：将目前所有的 stty 参数列出来；
+
+#列出所有的按键与按键内容
+[dmtsai@study ~]$ stty -a
+speed 38400 baud; rows 20; columns 90; line = 0;
+intr = ^C; quit = ^\; erase = ^?; kill = ^U; eof = ^D; eol = <undef>; eol2 = <undef>;
+swtch = <undef>; start = ^Q; stop = ^S; susp = ^Z; rprnt = ^R; werase = ^W; lnext = ^V;
+flush = ^O; min = 1; time = 0;
+....（以下省略）....
+
+#设置按键
+[dmtsai@study ~]$ stty erase ^h
+
+意义:
+intr  : 送出一个 interrupt （中断） 的讯号给目前正在 执行的程序 （就是终止啰！）；
+quit  : 送出一个 quit 的讯号给目前正在执行的程序；
+erase : 向后删除字符，
+kill  : 删除在目前命令行上的所有文字；
+eof   : End of file 的意思，代表“结束输入”。
+start : 在某个程序停止后，重新启动他的 output
+stop  : 停止目前屏幕的输出；
+susp  : 送出一个 terminal stop 的讯号给正在 run 的程序。
+```
+
+#### set命令
+
+
 

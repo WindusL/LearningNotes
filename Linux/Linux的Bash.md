@@ -74,7 +74,7 @@ type 这个指令我们可以知道每个指令是否为 bash 的内置指令。
 	</tr>
 	<tr>
 		<td>Ctrl + Z</td>
-		<td>“暂停”目前的命令</td>
+		<td>“暂停”目前的命令 配合fg/bg/jobs命令使用</td>
 	</tr>
 </table>
 
@@ -448,6 +448,277 @@ susp  : 送出一个 terminal stop 的讯号给正在 run 的程序。
 ```
 
 #### set命令
+---
 
+暂无
+
+---
+
+### 万用字符与特殊符号
+万用字符:
+
+```
+*	代表“ 0 个到无穷多个”任意字符
+?	代表“一定有一个”任意字符
+[]	同样代表“一定有一个在括号内”的字符（非任意字符）。例如 [abcd] 代表“一定有一个字符， 可能是 a, b, c, d 这四个任何一个”
+
+[-]	若有减号在中括号内时，代表“在编码顺序内的所有字符”。例如 [0-9] 代表 0 到 9 之间的所有数字，因为数字的语系编码是连续的！
+
+[^]	若中括号内的第一个字符为指数符号 （^） ，那表示“反向选择”，例如 [^abc] 代表 一定有一个字符，只要是非 a, b, c 的其他字符就接受的意思。
+```
+
+特殊字符:
+
+```
+#	注解符号：这个最常被使用在 script 当中，视为说明！在后的数据均不执行
+\	跳脱符号：将“特殊字符或万用字符”还原成一般字符
+|	管线 （pipe）：分隔两个管线命令的界定（后两节介绍）；
+;	连续指令下达分隔符号：连续性命令的界定 （注意:与管线命令并不相同）
+~	使用者的主文件夹
+$	取用变量前置字符：亦即是变量之前需要加的变量取代值
+&	工作控制 （job control）：将指令变成背景下工作
+!	逻辑运算意义上的“非” not 的意思！
+/	目录符号：路径分隔的符号
+>, >>	数据流重导向：输出导向，分别是“取代”与“累加”
+<, <<	数据流重导向：输入导向 
+''	单引号，不具有变量置换的功能 （$ 变为纯文本）
+""	具有变量置换的功能！ （$ 可保留相关功能）
+``	两个“ ` ”中间为可以先执行的指令，亦可使用 $（ ）
+()	在中间为子 shell 的起始与结束
+{}	在中间为命令区块的组合！
+```
+## 数据流重导向
+### 数据流输入/输出
+***标准输出***:指的是“指令执行所回传的正确的讯息”  
+***标准错误输出***:“ 指令执行失败后，所回传的错误讯息”  
+
+> 标准输入　　（stdin） ：代码为 0 ，使用 < 或 << ；  
+> 标准输出　　（stdout）：代码为 1 ，使用 > 或 >> ；  
+> 标准错误输出（stderr）：代码为 2 ，使用 2> 或 2>> ；
+
+#### /dev/null 垃圾桶黑洞设备与特殊写法
+/dev/null 可以吃掉任何导向这个设备的信息 
+
+#### 2>& | &>
+
+	```
+	#将指令的数据全部写入名为 list 的文件中(包括错误信息)
+	[dmtsai@study ~]$ find /home -name .bashrc > list 2>&1    
+	[dmtsai@study ~]$ find /home -name .bashrc &> list        
+	```
+#### 标准输入
+
+```
+#利用 cat 指令来创建一个文件的简单流程
+[dmtsai@study ~]$ cat > catfile
+testing
+cat file test
+<==这里按下 [ctrl]+d 来离开
+
+[dmtsai@study ~]$ cat catfile
+testing
+cat file test
+
+#用 stdin 取代键盘的输入以创建新文件的简单流程
+[dmtsai@study ~]$ cat > catfile < ~/.bashrc
+[dmtsai@study ~]$ ll catfile ~/.bashrc
+# 注意看，这两个文件的大小会一模一样！几乎像是使用 cp 来复制一般！
+-rw-r--r--. 1 dmtsai dmtsai 231 Mar  6 06:06 /home/dmtsai/.bashrc
+-rw-rw-r--. 1 dmtsai dmtsai 231 Jul  9 18:58 catfile
+
+
+#用 cat 直接将输入的讯息输出到 catfile 中， 且当由键盘输入 eof 时，该次输入就结束
+[dmtsai@study ~]$ cat > catfile << "eof"
+> This is a test.
+> OK now stop
+> eof  <==输入这关键字，立刻就结束而不需要输入 [ctrl]+d
+
+[dmtsai@study ~]$ cat catfile
+This is a test.
+OK now stop     <==只有这两行，不会存在关键字那一行！
+```
+
+### 命令执行的判断依据 ;  &&  ||
+#### 不考虑指令相关性的连续指令下达 cmd;cmd
+
+```
+[root@study ~]# sync; sync; shutdown -h now
+```
+
+#### $? （指令回传值） 与 && 或 ||
+若前一个指令执行的结果为正确，在 Linux 下面会回传一个 $? = 0 的值
+
+<table>
+	<tr>
+		<th>指令</th>
+		<th>说明</th>
+	</tr>
+	<tr>
+		<td>cmd1 && cmd2</td>
+		<td>
+		1. 若 cmd1 执行完毕且正确执行（$?=0），则开始执行 cmd2。<br/>  
+		2. 若 cmd1 执行完毕且为错误 （$?≠0），则 cmd2 不执行。</td>
+	</tr>
+	<tr>
+		<td>cmd1 || cmd2</td>
+		<td>
+		1. 若 cmd1 执行完毕且正确执行（$?=0），则 cmd2 不执行。<br/>  
+		2. 若 cmd1 执行完毕且为错误 （$?≠0），则开始执行 cmd2。</td>
+	</tr>
+</table>
+
+```
+[dmtsai@study ~]$ ls /tmp/abc || mkdir /tmp/abc && touch /tmp/abc/hehe
+```
+
+Linux 下面的指令都是由左往右执行,上面执行结果:  
+*情况一:*  
+（1）若 /tmp/abc 不存在故回传 $?≠0，则  
+（2）因为 || 遇到非为 0 的 \$? 故开始 mkdir /tmp/abc，由于 mkdir /tmp/abc 会成功进行，所以回传 \$?=0   
+（3）因为 && 遇到 \$?=0 故会执行 touch /tmp/abc/hehe，最终 hehe 就被创建了；
+
+*情况二:*  
+（1）若 /tmp/abc 存在故回传 $?=0，则  
+（2）因为 || 遇到 0 的 $? 不会进行，此时 $?=0 继续向后传，故   
+（3）因为 && 遇到 \$?=0 就开始创建 /tmp/abc/hehe 了！最终 /tmp/abc/hehe 被创建起来。
+
+![指令执行关系示意图](img/QQ20180316-134233@2x.png)
+
+```
+ls /tmp/vbirding || echo "not exist" && echo "exist”
+#返回结果:
+not exist
+exist
+```
+
+> 由于指令是一个接着一个去执行的，因此，如果真要使用判断， 那么这个 && 与 || 的顺序就不能搞错(如上面例子).  
+> 一般来说，假设判断式有三个，也就是：  
+> command1 && command2 || command3
+
+## 管线命令(pipe)
+**管线命令使用的是“ | ”这个界定符号！ 另外，管线命令与“连续下达命令”是不一样！**   
+**管线命令“ | ”仅能处理经由前面一个指令传来的正确信息，也就是 standard output 的信息，对于 stdandard error 并没有直接处理的能力.**  
+**每个管线后面接的第一个数据必定是“指令”喔！而且这个指令必须要能够接受 standard input 的数据才行，这样的指令才可以是为“管线命令”**
+
+### 撷取命令 cut grep
+#### cut
+将一段讯息的某一段给他“切”出来～ 处理的讯息是以“行”为单位
+
+```
+[dmtsai@study ~]$ cut -d'分隔字符' -f fields <==用于有特定分隔字符
+[dmtsai@study ~]$ cut -c 字符区间            <==用于排列整齐的讯息
+选项与参数：
+-d  ：后面接分隔字符。与 -f 一起使用；
+-f  ：依据 -d 的分隔字符将一段讯息分区成为数段，用 -f 取出第几段的意思；
+-c  ：以字符 （characters） 的单位取出固定字符区间；
+
+[dmtsai@study ~]$ echo ${PATH} | cut -d ':' -f 5 #显示切割后的第5个
+[dmtsai@study ~]$ echo ${PATH} | cut -d ':' -f 3,5 #显示切割后的3-5个
+[dmtsai@study ~]$ echo ${PATH} | cut -d ':' -f 3- #显示切割后的3到最后一个
+
+#将 export 输出的讯息，取得第 12 字符以后的所有字串
+[dmtsai@study ~]$ export
+declare -x HISTCONTROL="ignoredups"
+declare -x HISTSIZE="1000"
+declare -x HOME="/home/dmtsai"
+declare -x HOSTNAME="study.centos.vbird"
+.....（其他省略）.....
+# 注意看，每个数据都是排列整齐的输出！如果我们不想要“ declare -x ”时，就得这么做：
+
+[dmtsai@study ~]$ export | cut -c 12-
+HISTCONTROL="ignoredups"
+HISTSIZE="1000"
+HOME="/home/dmtsai"
+HOSTNAME="study.centos.vbird"
+.....（其他省略）.....
+```
+
+#### grep
+
+```
+[dmtsai@study ~]$ grep [-acinv] [--color=auto] '搜寻字串' filename
+选项与参数：
+-a ：将 binary 文件以 text 文件的方式搜寻数据
+-c ：计算找到 '搜寻字串' 的次数
+-i ：忽略大小写的不同，所以大小写视为相同
+-n ：顺便输出行号
+-v ：反向选择，亦即显示出没有 '搜寻字串' 内容的那一行！
+--color=auto ：可以将找到的关键字部分加上颜色的显示喔！
+```
+
+### 排序命令 sort wc uniq
+#### sort
+
+```
+[dmtsai@study ~]$ sort [-fbMnrtuk] [file or stdin]
+选项与参数：
+-f  ：忽略大小写的差异，例如 A 与 a 视为编码相同；
+-b  ：忽略最前面的空白字符部分；
+-M  ：以月份的名字来排序，例如 JAN, DEC 等等的排序方法；
+-n  ：使用“纯数字”进行排序（默认是以文字体态来排序的）；
+-r  ：反向排序；
+-u  ：就是 uniq ，相同的数据中，仅出现一行代表；
+-t  ：分隔符号，默认是用 [tab] 键来分隔；
+-k  ：以那个区间 （field） 来进行排序的意思
+
+
+#/etc/passwd 内容是以 : 来分隔的，我想以第三栏来排序，该如何？
+[dmtsai@study ~]$ cat /etc/passwd | sort -t ':' -k 3
+root:x:0:0:root:/root:/bin/bash
+dmtsai:x:1000:1000:dmtsai:/home/dmtsai:/bin/bash
+alex:x:1001:1002::/home/alex:/bin/bash
+arod:x:1002:1003::/home/arod:/bin/bash
+# 看到特殊字体的输出部分了吧？怎么会这样排列啊？呵呵！没错啦～
+# 如果是以文字体态来排序的话，原本就会是这样，想要使用数字排序：
+# cat /etc/passwd | sort -t ':' -k 3 -n
+# 这样才行啊！用那个 -n 来告知 sort 以数字来排序啊！
+```
+
+#### uniq
+重复的数据仅列出一个显示
+
+```
+[dmtsai@study ~]$ uniq [-ic]
+选项与参数：
+-i  ：忽略大小写字符的不同；
+-c  ：进行计数
+
+#使用 last 将帐号列出，仅取出帐号栏，进行排序后仅取出一位；
+[dmtsai@study ~]$ last | cut -d ' ' -f1 | sort | uniq
+
+#承上,继续显示每个帐号登录次数
+[dmtsai@study ~]$ last | cut -d ' ' -f1 | sort | uniq -c
+      1
+      6 （unknown
+     47 dmtsai
+      4 reboot
+      7 root
+      1 wtmp
+```
+
+#### wc
+
+```
+[dmtsai@study ~]$ wc [-lwm]
+选项与参数：
+-l  ：仅列出行；
+-w  ：仅列出多少字（英文单字）；
+-m  ：多少字符；
+
+#/etc/man_db.conf 里面到底有多少相关字、行、字符数？
+[dmtsai@study ~]$ cat /etc/man_db.conf | wc
+    131     723    5171
+# 输出的三个数字中，分别代表： “行、字数、字符数
+```
+
+### 双重导向tee
+
+### 字符转换命令 tr, col, join, paste, expand
+
+### 分区命令 split
+
+### 参数代换 xargs
+
+### 减号 " - " 的用途
 
 

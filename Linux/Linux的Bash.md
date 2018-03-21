@@ -644,6 +644,8 @@ HOSTNAME="study.centos.vbird"
 -n ：顺便输出行号
 -v ：反向选择，亦即显示出没有 '搜寻字串' 内容的那一行！
 --color=auto ：可以将找到的关键字部分加上颜色的显示喔！
+-A : 后面可加数字，为 after 的意思，除了列出该行外，后续的 n 行也列出来；
+-B : 后面可加数字，为 before 的意思，除了列出该行外，前面的 n 行也列出来；
 ```
 
 ### 排序命令 sort wc uniq
@@ -712,13 +714,172 @@ arod:x:1002:1003::/home/arod:/bin/bash
 ```
 
 ### 双重导向tee
+可以让 standard output 转存一份到文件内并将同样的数据继续送到屏幕去处理.
+![tee工作流程示意图](img/QQ20180319-161532@2x.png)
+
+```
+[dmtsai@study ~]$ tee [-a] file
+选项与参数：
+-a  ：以累加 （append） 的方式，将数据加入 file 当中！
+
+[dmtsai@study ~]$ ls -l /home | tee ~/homefile | more
+# 将 ls 的数据存一份到 ~/homefile ，同时屏幕也有输出讯息！
+
+[dmtsai@study ~]$ ls -l / | tee -a ~/homefile | more
+# 要注意！ tee 后接的文件会被覆盖，若加上 -a 这个选项则能将讯息累加。
+```
 
 ### 字符转换命令 tr, col, join, paste, expand
+#### tr 
+tr 可以用来删除一段讯息当中的文字，或者是进行文字讯息的替换！
+
+```
+[dmtsai@study ~]$ tr [-ds] SET1 ...
+选项与参数：
+-d  ：删除讯息当中的 SET1 这个字串；
+-s  ：取代掉重复的字符！
+
+#将 last 输出的讯息中，所有的小写变成大写字符：
+[dmtsai@study ~]$ last | tr '[a-z]' '[A-Z]'
+# 不加单引号也是可以执行的，如：“ last | tr [a-z] [A-Z] ”
+
+#将 /etc/passwd 输出的讯息中，将冒号 （:） 删除
+[dmtsai@study ~]$ cat /etc/passwd | tr -d ':'
+```
+
+#### col 
+用来简单的处理将 [tab] 按键取代成为空白键.(***还有其它用途???***)
+
+```
+[dmtsai@study ~]$ col [-xb]
+选项与参数：
+-x  ：将 tab 键转换成对等的空白键
+
+#利用 cat -A 显示出所有特殊按键，最后以 col 将 [tab] 转成空白
+[dmtsai@study ~]$ cat -A /etc/man_db.conf  <==此时会看到很多 ^I 的符号，那就是 tab
+[dmtsai@study ~]$ cat /etc/man_db.conf | col -x | cat -A | more
+```
 
 ### 分区命令 split
+如果有文件太大，导致一些携带式设备无法复制的问题，split 可以将一个大文件，依据文件大小或行数来分区，就可以将大文件分区成为小文件了
+
+```
+[dmtsai@study ~]$ split [-bl] file PREFIX
+选项与参数：
+-b  ：后面可接欲分区成的文件大小，可加单位，例如 b, k, m 等；
+-l  ：以行数来进行分区。
+PREFIX ：代表前置字符的意思，可作为分区文件的前导文字。
+```
+
+`范例一`：我的 /etc/services 有六百多K，若想要分成 300K 一个文件时？
+
+```
+[dmtsai@study ~]$ cd /tmp; split -b 300k /etc/services services
+[dmtsai@study tmp]$ ll -k services*
+-rw-rw-r--. 1 dmtsai dmtsai 307200 Jul  9 22:52 servicesaa
+-rw-rw-r--. 1 dmtsai dmtsai 307200 Jul  9 22:52 servicesab
+-rw-rw-r--. 1 dmtsai dmtsai  55893 Jul  9 22:52 servicesac
+# 那个文件名可以随意取的啦！我们只要写上前导文字，小文件就会以xxxaa, xxxab, xxxac 等方式来创建小文件的！
+```
+
+`“范例二`：如何将上面的三个小文件合成一个文件，文件名为 servicesback
+
+```
+#用数据流重导向合成文件
+[dmtsai@study tmp]$ cat services* >> servicesback
+```
+
+`范例三`：使用 ls -al / 输出的信息中，每十行记录成一个文件
+
+```
+[dmtsai@study tmp]$ ls -al / | split -l 10 - lsroot
+[dmtsai@study tmp]$ wc -l lsroot*
+  10 lsrootaa
+  10 lsrootab
+   4 lsrootac
+  24 total
+# 重点在那个 - 啦！一般来说，如果需要 stdout/stdin 时，但偏偏又没有文件，有的只是 - 时，那么那个 - 就会被当成 stdin 或 stdout ～
+```
 
 ### 参数代换 xargs
 
+```
+[dmtsai@study ~]$ xargs [-0epn] command
+选项与参数：
+-0  ：如果输入的 stdin 含有特殊字符，例如 `, \, 空白键等等字符时，这个 -0 参数
+      可以将他还原成一般字符。这个参数可以用于特殊状态！
+-e  ：这个是 EOF （end of file） 的意思。后面可以接一个字符串，当 xargs 分析到这个字串时，就会停止继续工作！
+-p  ：在执行每个指令的 argument 时，都会询问使用者的意思；
+-n  ：后面接次数，每次 command 指令执行时，要使用几个参数的意思。
+当 xargs 后面没有接任何的指令时，默认是以 echo 来进行输出喔！
+```
+
+`范例一`：将 /etc/passwd 内的第一栏取出，仅取三行，使用 id 这个指令将每个帐号内容秀出来.
+
+```
+[dmtsai@study ~]$ id root
+uid=0（root） gid=0（root） groups=0（root）   
+# 这个 id 指令可以查询使用者的 UID/GID 等信息
+
+[dmtsai@study ~]$ id $(cut -d ':' -f 1 /etc/passwd | head -n 3)
+# 虽然使用 $（cmd） 可以预先取得参数，但可惜的是， id 这个指令“仅”能接受一个参数而已！
+# 所以上述的这个指令执行会出现错误！根本不会显示用户的 ID 啊！
+
+[dmtsai@study ~]$ cut -d ':' -f 1 /etc/passwd | head -n 3 | id
+uid=1000 (dmtsai) gid=1000 (dmtsai) groups=1000 (dmtsai),10(wheel)
+# 因为 id 并不是管线命令，因此在上面这个指令执行后，前面的东西通通不见！只会执行 id！
+
+[dmtsai@study ~]$ cut -d ':' -f 1 /etc/passwd | head -n 3 | xargs id
+# 依旧会出现错误！这是因为 xargs 一口气将全部的数据通通丢给 id 处理～但id 就接受 1 个参数！
+
+[dmtsai@study ~]$ cut -d ':' -f 1 /etc/passwd | head -n 3 | xargs -n 1 id
+uid=0（root） gid=0（root） groups=0（root）
+uid=1（bin） gid=1（bin） groups=1（bin）
+uid=2（daemon） gid=2（daemon） groups=2（daemon）
+# 通过 -n 来处理，一次给予一个参数，因此上述的结果就 OK 正常的显示啰！
+```
+
+`范例二`：同上，但是每次执行 id 时，都要询问使用者是否动作？
+
+```
+[dmtsai@study ~]$ cut -d ':' -f 1 /etc/passwd | head -n 3 | xargs -p -n 1 id
+id root ?...y
+uid=0（root） gid=0（root） groups=0（root）
+id bin ?...y
+.....（下面省略）.....
+# 呵呵！这个 -p 的选项可以让使用者的使用过程中，被询问到每个指令是否执行！
+```
+
+`范例三`：将所有的 /etc/passwd 内的帐号都以 id 查阅，但查到 sync 就结束指令串
+
+```
+[dmtsai@study ~]$ cut -d ':' -f 1 /etc/passwd | xargs -e'sync' -n 1 id
+# 仔细与上面的案例做比较。也同时注意，那个 -e'sync' 是连在一起的，中间没有空白键。
+# 上个例子当中，第六个参数是 sync 啊，那么我们下达 -e'sync' 后，则分析到 sync 这个字串时，
+# 后面的其他 stdin 的内容就会被 xargs 舍弃掉了！
+```
+
+***很多指令其实并不支持管线命令，因此我们可以通过 xargs 来提供该指令引用 standard input 之用！***
+
+`范例四`：找出 /usr/sbin 下面具有特殊权限的文件名，并使用 ls -l 列出详细属性
+
+```
+[dmtsai@study ~]$ find /usr/sbin -perm /7000 | xargs ls -l
+-rwx--s--x. 1 root lock      11208 Jun 10  2014 /usr/sbin/lockdev
+-rwsr-xr-x. 1 root root     113400 Mar  6 12:17 /usr/sbin/mount.nfs
+-rwxr-sr-x. 1 root root      11208 Mar  6 11:05 /usr/sbin/netreport
+.....（下面省略）.....
+# 也可以使用“ ls -l $（find /usr/sbin -perm /7000） ”来处理这个范例！
+```
+
 ### 减号 " - " 的用途
+管线命令当中，常常会使用到前一个指令的 stdout 作为这次的 stdin ， 某些指令需要用到文件名称 （例如 tar） 来进行处理时，该 stdin 与 stdout 可以利用减号 "-" 来替代.
+
+```
+[root@study ~]# mkdir /tmp/homeback
+[root@study ~]# tar -cvf - /home | tar -xvf - -C /tmp/homeback
+```
+
+> 上面这个例子是：“将 /home 里面的文件给他打包，但打包的数据不是纪录到文件，而是传送到 stdout； 经过管线后，将 tar -cvf - /home 传送给后面的 tar -xvf - ”。后面的这个 - 则是取用前一个指令的 stdout， 因此，我们就不需要使用 filename 了
 
 

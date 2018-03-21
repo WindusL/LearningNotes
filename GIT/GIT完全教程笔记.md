@@ -141,7 +141,7 @@ $ git checkout -b 分支名 远程分支名 ＃拉取远程分支到本地分支
 $ git branch (-a/r) #列出所有本地分支(-a 包括远程分支,-r仅列出远程分支)
 $ git branch -v|-vv #查看每个分支最后一次的提交(-vv选项会列表更多信息)
 $ git merge 分支名 #合并指定分支到当前分支
-$ git branch -d (-r) 分支名 #删除已合并本地(-r表示romote远程)分支
+$ git branch -d (-r) 分支名 #删除已合并本地分支(加-r表示删除romote远程分支)
 $ git branch -D 分支名 #强制删除未合并的分支
 $ git branch -m|-M 旧分支名 新分支名 # 分支生命名（-M强制生命名）
 ```
@@ -186,11 +186,16 @@ $ git merge --no-ff -m 注释 分支名 #合并分支(--no-ff表示禁用Fast Fo
 
 ```
 $ git stash #储藏工作区(储藏后再用git status查看就是干净的, 除非是没有被git管理的文件)
-$ git stash save 注释 #储藏工作区并添加注释
+$ git stash save (--keep-index|-u|--patch)注释 #储藏工作区并添加注释
+(
+--keep-index #不储藏任何通过 git add 命令已暂存的;
+-u #储藏任何创建的未跟踪文件
+--patch #不会储藏所有修改过的任何东西，但是会交互式地提示哪些改动想要储藏、哪些改动需要保存在工作目录中。
+)
 $ git stash list #查看stash列表
 $ git stash apply #恢复stash，但stash不删除
 $ git stash pop #恢复stash，同时删除stash
-$ git stash drop #移除stash
+$ git stash drop #移除stash (会删除储存所有修改,谨慎使用)
 $ git stash show (-p/--patch) #查看stash(详细)修改
 ```
 > 如果多次执行stash后，恢复stash就加上stash名，如：git stash pop/apply stash@{0}
@@ -277,6 +282,23 @@ $ git log --committer #仅显示指定提交者相关的提交。
 $ git log --grep #仅显示含指定关键字的提交
 ```
 
+> 提交区间
+
+```
+1. 双点语法(..)
+$ git log master..dev #比对dev还没提交到master分支的记录
+$ git log origin/master..HEAD #输出在你当前分支中而不在远程 origin 中的提交(如果留空了其中的一边， Git 会默认为 HEAD)
+
+2. 多点语法(^ 或 --not)
+$ git log refA refB ^refC #查看所有被 refA 或 refB 包含的但是不被 refC 包含的提交
+$ git log refA refB --not refC
+
+3. 三点语法(...)
+语法可以选择出被两个引用中的一个包含但又不被两者同时包含的提交
+$ git log master...experiment #看 master 或者 experiment 中包含的但不是两者共有的提交
+$ git log --left-right master...experiment(--left-right显示是哪边分支的提交 ">" 或 "<")
+```
+
 ## 比较 git diff
 
 ```
@@ -286,4 +308,52 @@ git diff HEAD/commitId <filename> #比较工作区与(上次/指定commitId)提�
 git diff commitId commitId #比较Git仓库任意两次 commit 之间的差别
 git diff --stat #比较统计(如几处删除,几处增加等等)
 ```
+
+
+## GIT工具
+### 交互式暂存
+修改一组文件后，希望这些改动能放到若干提交而不是混杂在一起成为一个提交.
+```
+$ git add -i #进入交互终端
+$ git add -p(--patch) #Git暂存文件的特定部分(文件中做了两处修改，但只想要暂存其中的一个)
+```
+
+### 清理 git clean
+需要谨慎地使用这个命令，因为它被设计为从工作目录中移除没有忽略的未跟踪文件(任何与 .gitiignore 或其他忽略文件中的模式匹配的文件都不会被移除),可能无法再找回.
+
+```
+git clean 
+	-f 表示强制清理
+	-d 后面接要清理的目录
+	-n 演习删除,显示将要删除的内容
+	-x 完全干净删除
+```
+### 搜索 git grep
+从提交历史或者工作目录中查找一个字符串或者正则表达式.
+
+```
+git grep
+	-n 输出内容所在文件的行号
+ 	--count 输出内容所在文件的数量
+```
+
+### 日志搜索
+
+```
+git log
+	-S 字符串 #显示新增和删除该字符串的提交
+	-G 相对于-S更精准,使用正则表达式搜索
+	-L 展示代码中一行或者一个函数的历史
+	
+#找到 ZLIB_BUF_MAX 常量是什么时候引入的
+$ git log -SZLIB_BUF_MAX --oneline
+e01503b zlib: allow feeding more than 4GB in one go
+ef49a7a zlib: zlib can only process 4GB at a time	
+
+#查看 zlib.c 文件中`git_deflate_bound` 函数的每一次变更
+$ git log -L :git_deflate_bound:zlib.c
+```
+
+
+
 

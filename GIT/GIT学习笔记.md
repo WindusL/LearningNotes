@@ -385,6 +385,21 @@ ef49a7a zlib: zlib can only process 4GB at a time
 $ git log -L :git_deflate_bound:zlib.c
 ```
 
+### 忽略文件
+一般情况,可以使用.gitignore文件添加忽略文件.如果当前文件是已经commit ,push到远程仓库后了，.gitignore里面再配置是不起作用了.此时解决办法有两种:   
+
+一种方法是移除文件跟踪,然后将文件添加到.gitignore文件中去(此种方法对其他人影响较大).  
+另一种方法是仅在自己本地忽略:
+
+```
+$ git update-index --assume-unchanged 文件名 #忽略文件
+$ git update-index --no-assume-unchanged 文件名 #取消忽略文件
+$ git ls-files -v | grep h\<space> #显示本地忽略文件列表(<space> 是表示空格)
+
+更多信息使用 --help 自行查阅
+
+```
+
 
 
 

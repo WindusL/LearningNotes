@@ -257,7 +257,6 @@ v1.4.2.4
 
 $ git tag 标签名 #打标签(轻量标签)
 $ git tag 标签名 commitId #给指定commit打标签
-$ git show 标签名 #查看标签信息
 
 $ git tag -a 标签名 -m 注释 commitId #创建带有说明的标签(附注标签)
 
@@ -317,6 +316,14 @@ $ git log refA refB --not refC
 语法可以选择出被两个引用中的一个包含但又不被两者同时包含的提交
 $ git log master...experiment #看 master 或者 experiment 中包含的但不是两者共有的提交
 $ git log --left-right master...experiment(--left-right显示是哪边分支的提交 ">" 或 "<")
+```
+
+## git show
+显示标签、commitId等对象的信息
+
+```
+git show 标签名 #查看标签信息
+git show (--stat) commitId #查看指定提交的详细信息(--stat只查看变动文件)
 ```
 
 ## 比较 git diff

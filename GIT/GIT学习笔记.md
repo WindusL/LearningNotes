@@ -227,9 +227,12 @@ $ git push origin 分支名 #推送分支到远程仓库
 
 ```
 #设置跟踪分支(将本地分支与远程库分支时行连接。)
-$ git branch --set-upstream|-u 分支名 origin/分支名 #最新版本已被废弃
+$ git branch --set-upstream origin 分支名 #最新版本已被废弃
 #最新版本命令
-$ git branch --set-upstream-to=origin/<branch> 分支名
+$ git branch --set-upstream-to=origin/<branch> 分支名 (可简写为 -u)
+
+#取消跟踪远程分支
+$ git branch --unset-upstream 分支名
 ```
 
 ### 多人协作
@@ -257,7 +260,6 @@ v1.4.2.4
 
 $ git tag 标签名 #打标签(轻量标签)
 $ git tag 标签名 commitId #给指定commit打标签
-$ git show 标签名 #查看标签信息
 
 $ git tag -a 标签名 -m 注释 commitId #创建带有说明的标签(附注标签)
 
@@ -317,6 +319,14 @@ $ git log refA refB --not refC
 语法可以选择出被两个引用中的一个包含但又不被两者同时包含的提交
 $ git log master...experiment #看 master 或者 experiment 中包含的但不是两者共有的提交
 $ git log --left-right master...experiment(--left-right显示是哪边分支的提交 ">" 或 "<")
+```
+
+## git show
+显示标签、commitId等对象的信息
+
+```
+git show 标签名 #查看标签信息
+git show (--stat) commitId #查看指定提交的详细信息(--stat只查看变动文件)
 ```
 
 ## 比较 git diff

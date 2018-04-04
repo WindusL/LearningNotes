@@ -7,7 +7,7 @@ tag:
 	- 学习笔记
 comments: false
 ---
-
+[TOC]
 ## 第一次安装设置
 ```
 #因为git是分布式,这些就是你在提交commit时的签名。(--global全局设置,不加则设置当前版本库)
@@ -397,9 +397,27 @@ $ git update-index --no-assume-unchanged 文件名 #取消忽略文件
 $ git ls-files -v | grep h\<space> #显示本地忽略文件列表(<space> 是表示空格)
 
 更多信息使用 --help 自行查阅
-
 ```
 
+### 命令自动补全
+- 第一步 下载git官方提供的自动补全git-completion.bash脚本到自己的家目录并重命名为.git-completion.bash
 
+```
+curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
+```
 
+- 第二步 将下载的脚本添加到~/.bash_profile文件
+
+```
+if [ -f ~/.git-completion.bash ]; then 
+. ~/.git-completion.bash 
+fi 
+# . 符号可以换成source
+```
+
+- 第三步 编译~/.bash_profile使其立即生效
+
+```
+source ~/.bash_profile
+```
 

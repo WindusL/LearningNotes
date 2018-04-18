@@ -207,7 +207,12 @@ $ git stash pop #恢复stash，同时删除stash
 $ git stash drop #移除stash (会删除储存所有修改,谨慎使用)
 $ git stash show (-p/--patch) #查看stash(详细)修改
 ```
-> 如果多次执行stash后，恢复stash就加上stash名，如：git stash pop/apply stash@{0}
+> 如果多次执行stash后，恢复stash就加上stash名，如：git stash pop/apply stash@{0}  
+> 默认情况,stash不会存储Untracked files.如果想要存储,要先git add添加到版本库或者使用git stash -u选项,如下:
+
+```
+git stash -u (--include-untracked) # 存储工作空间包括Untracked files
+```
 
 ### Feature分支
 > 开发新功能时最好创建一个新的分支(命名:feature-x)。
@@ -398,6 +403,10 @@ $ git ls-files -v | grep h\<space> #显示本地忽略文件列表(<space> 是�
 
 更多信息使用 --help 自行查阅
 ```
+
+> --assume-unchanged与--skip-worktree 的区别  
+> 前者 忽略更改文件,当索引中文件条目变化时则失效（即，此文件变化自上游）  
+> 后者 忽略更改文件,索引中文件条目变化仍起作用(直至此索引被放弃)
 
 ### 命令自动补全
 - 第一步 下载git官方提供的自动补全git-completion.bash脚本到自己的家目录并重命名为.git-completion.bash

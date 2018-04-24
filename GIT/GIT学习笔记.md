@@ -111,7 +111,7 @@ $ git push #本地内容推送到远程仓库
 > 此后,每次推送本地修改内容可以使用命令:git push origin master
 
 ```
-	$ git clone 远程仓库地址 #克隆远程仓库到本地
+	$ git clone [-b 分支名] 远程仓库地址 #克隆远程仓库到本地(-b指定分支)
 	$ git fetch 远程仓库名 #从服务器上抓取本地没有的数据，它并不会修改工作目录中的内容, 它只会获取数据然后让你自己合并.
 	$ git pull (--allow-unrelated-histories) #从服务器抓取分支数据并然后尝试合并.
 ```
@@ -307,6 +307,7 @@ $ git log --graph #展示分支、合并历史
 $ git log --author #仅显示指定作者相关的提交。
 $ git log --committer #仅显示指定提交者相关的提交。
 $ git log --grep #仅显示含指定关键字的提交
+$ git log 文件名 #仅显示指定文件提交历史
 ```
 
 > 提交区间

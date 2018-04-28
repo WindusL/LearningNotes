@@ -1,11 +1,11 @@
 ---
 title: GIT学习笔记
+date: 2018-03-29
 categories: 
 	- 软件开发
 tag: 
 	- GIT
 	- 学习笔记
-comments: false
 ---
 [TOC]
 ## 第一次安装设置

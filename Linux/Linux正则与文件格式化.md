@@ -1,11 +1,11 @@
 ---
 title: Linux正则与文件格式化
+date: 2018-03-21
 categories: 
 	- 软件开发
 tag: 
 	- Linux
 	- 学习笔记
-comments: false
 ---
 [TOC]
 ## 基础正则表达式

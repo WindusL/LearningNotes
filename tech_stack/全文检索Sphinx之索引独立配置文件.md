@@ -1,11 +1,11 @@
 ---
 title: 全文检索Sphinx—多索引配置文件
+date: 2018-04-18
 categories: 软件开发
 tags:
 	- 学习笔记
 	- 全文检索
 	- Sphinx
-comments: false
 ---
 
 [TOC]

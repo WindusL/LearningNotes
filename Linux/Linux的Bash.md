@@ -1,11 +1,11 @@
 ---
 title: Linux的Bash
+date: 2018-03-06
 categories: 
 	- 软件开发
 tag: 
 	- Linux
 	- 学习笔记
-comments: false
 ---
 [TOC]
 ## Shell

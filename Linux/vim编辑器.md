@@ -1,11 +1,11 @@
 ---
 title: vim编辑器
+date: 2018-03-27
 categories: 
 	- 软件开发
 tag: 
 	- Linux
 	- 学习笔记
-comments: false
 ---
 [TOC]
 

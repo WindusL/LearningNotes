@@ -5,7 +5,7 @@ categories:
 	- 软件开发
 tag: 
 	- GIT
-	- 学习笔记
+	- Linux学习笔记
 ---
 [TOC]
 ## 第一次安装设置
